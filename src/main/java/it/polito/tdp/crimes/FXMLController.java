@@ -8,6 +8,7 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 import it.polito.tdp.crimes.model.Model;
+import it.polito.tdp.crimes.model.Vicino;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -25,13 +26,13 @@ public class FXMLController {
     private URL location;
 
     @FXML // fx:id="boxAnno"
-    private ComboBox<?> boxAnno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxAnno; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxMese"
-    private ComboBox<?> boxMese; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxMese; // Value injected by FXMLLoader
 
     @FXML // fx:id="boxGiorno"
-    private ComboBox<?> boxGiorno; // Value injected by FXMLLoader
+    private ComboBox<Integer> boxGiorno; // Value injected by FXMLLoader
 
     @FXML // fx:id="btnCreaReteCittadina"
     private Button btnCreaReteCittadina; // Value injected by FXMLLoader
@@ -48,11 +49,50 @@ public class FXMLController {
     @FXML
     void doCreaReteCittadina(ActionEvent event) {
 
+    	txtResult.clear();
+    	Integer anno= boxAnno.getValue();
+    	if(anno==null) {
+    		txtResult.appendText("selezioanre un anno!");
+    		return;
+    	}
+    	
+    	
+    	model.creaGrafo(anno);
+    	txtResult.appendText("Grafo creato!\n");
+    	txtResult.appendText("#vertici: "+model.numVertici()+ "\n");
+    	txtResult.appendText("#archi: "+model.numArchi()+ "\n");
+    	
+    	for(Integer i: model.getDistretti()) {
+    		txtResult.appendText("Elenco distretti adiacenti al distretto: "+i+ "\n");
+    		for(Vicino v: model.getVicini(i)) {
+    			txtResult.appendText(v.toString()+ "\n");
+    		}
+    		txtResult.appendText("\n");
+    	}
     }
 
     @FXML
     void doSimula(ActionEvent event) {
 
+    	txtResult.clear();
+    	Integer anno= boxAnno.getValue();
+    	if(anno==null) {
+    		txtResult.appendText("selezioanre un anno!");
+    		return;
+    	}
+        boxMese.getItems().addAll(model.getMesi(anno));
+    	
+    	Integer mese= boxMese.getValue();
+    	if(mese==null) {
+    		txtResult.appendText("selezioanre un mese!");
+    		return;
+    	}
+    	boxGiorno.getItems().addAll(model.getGiorni(anno,mese));
+    	Integer numero= Integer.parseInt(txtN.getText());
+    	if(numero==null || numero>10 || numero<1) {
+    		txtResult.appendText("scrivere un numero compreso tra 1 e 10");
+    		return;
+    	}
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -69,5 +109,8 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	boxAnno.getItems().addAll(model.getYears());
+    	
+    	
     }
 }
